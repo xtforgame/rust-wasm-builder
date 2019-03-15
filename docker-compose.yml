@@ -1,0 +1,16 @@
+version: '3'
+services:
+  rust-wasm-builder:
+    image: xtforgame/rust-wasm-builder:0.1
+    build:
+      context: https://github.com/xtforgame/rust-wasm-builder.git
+      dockerfile: ./utils/Dockerfile
+
+    container_name: rust-wasm-builder
+
+    environment:
+      DYNO: "yes"
+      PORT: "8080"
+
+    ports:
+      - "8082:8080"

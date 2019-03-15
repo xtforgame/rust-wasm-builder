@@ -1,3 +1,4 @@
+const path = require("path");
 const {
   cargoCmd,
   rustcCmd,
@@ -16,15 +17,15 @@ function checkBuildPlan(plan) {
     return element["target_kind"].includes("custom-build");
   });
 
-  if (custom_build) {
-    success = false;
-    return { success, output: "", message: "the build includes custom builds" };
-  }
+  // if (custom_build) {
+  //   success = false;
+  //   return { success, output: "", message: "the build includes custom builds" };
+  // }
 
-  if (invocations.length > 1) {
-    success = false;
-    return { success, output: "", message: "dependencies are currently deactivated" };
-  }
+  // if (invocations.length > 1) {
+  //   success = false;
+  //   return { success, output: "", message: "dependencies are currently deactivated" };
+  // }
 
   return { "success": true };
 }
@@ -65,6 +66,7 @@ async function cargo(tar, options = {}) {
 
     let buildPlanOutput = await exec(joinCmd(planArgs), {});
     let buildPlan = JSON.parse(buildPlanOutput);
+    console.log('buildPlanOutput :', buildPlanOutput);
 
     let checkResult = checkBuildPlan(buildPlan);
 
@@ -92,9 +94,12 @@ async function cargo(tar, options = {}) {
       let m = await WebAssembly.compile(wasm);
       let ret = { success, message: output };
       if (WebAssembly.Module.customSections(m, "__wasm_bindgen_unstable").length !== 0) {
+        // console.log('wasmBindgenCmd, wasmFile :', wasmBindgenCmd, wasmFile);
         await exec(joinCmd([wasmBindgenCmd, wasmFile, '--no-modules', '--out-dir', tempDir]));
-        wasm = await readFile(wasmFile + '_bg.wasm');
-        ret.wasmBindgenJs = (await readFile(baseName + '.js')).toString();
+        let baseName = path.basename(wasmFile, '.wasm');
+        let basePath = path.join(tempDir, baseName);
+        wasm = await readFile(basePath + '_bg.wasm');
+        ret.wasmBindgenJs = (await readFile(basePath + '.js')).toString();
       } else {
         await exec(joinCmd([wasmGCCmd, wasmFile]));
         wasm = await readFile(wasmFile);

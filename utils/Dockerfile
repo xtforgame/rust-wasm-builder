@@ -1,5 +1,5 @@
 FROM ubuntu:16.04 as curl
-RUN apt-get update && apt-get install -y curl
+RUN apt-get update && apt-get install -y curl libssl-dev pkg-config
 
 FROM curl as node
 WORKDIR /node
@@ -25,17 +25,25 @@ COPY utils/blank.rs utils/blank.rs
 RUN CARGO_TARGET_DIR=/rust/wasm-bindgen cargo build --release --target wasm32-unknown-unknown
 
 # Minimize the size of this rust installation
-RUN rm -rf $HOME/.cargo/registry
-RUN strip -g $HOME/.cargo/bin/*
-RUN rm $HOME/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/bin/rust-gdb
-RUN rm $HOME/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/bin/rust-lldb
-RUN strip -g $HOME/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/bin/*
-RUN strip -g $HOME/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/**/*.so
-RUN strip -g $HOME/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/bin/*
-RUN rm $HOME/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/codegen-backends/*emscripten*
+# RUN rm -rf $HOME/.cargo/registry
+# RUN strip -g $HOME/.cargo/bin/*
+# RUN rm $HOME/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/bin/rust-gdb
+# RUN rm $HOME/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/bin/rust-lldb
+# # RUN strip -g $HOME/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/bin/*
+# # RUN strip -g $HOME/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/**/*.so
+# # RUN strip -g $HOME/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/bin/*
+# RUN rm $HOME/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/codegen-backends/*emscripten*
 
-FROM ubuntu:16.04
+FROM curl
 COPY --from=rust /rust /app
 COPY --from=node /node /app/node
 COPY ./app /app
-RUN tar czvf slug.tgz ./app
+WORKDIR /app
+ENV PATH=$PATH:/app/.cargo/bin:/app/node/bin
+ENV RUSTUP_HOME=/app/.rustup
+ENV CARGO_HOME=/app/.cargo
+ENV HOME=/app
+
+CMD ["node", "."]
+# CMD ["ls", "-al", "/app"]
+# RUN tar czvf slug.tgz ./app

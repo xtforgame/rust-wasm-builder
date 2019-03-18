@@ -6,9 +6,9 @@ tar cvf src.tar Cargo.toml src/*
 openssl base64 -A -in src.tar -out src.base64
 
 source=`cat src.base64`
-# echo "{ \"opts\": {}, \"tar\": \"$source\" }"
+# echo "{ \"options\": {}, \"tar\": \"$source\" }"
 
-curl -XPOST "http://localhost:8081/cargo" --data-binary "{ \"opts\": {}, \"tar\": \"$source\" }"
+curl -XPOST "http://localhost:8083/cargo" --data-binary "{ \"options\": { \"buildDir\": \"main\" }, \"tar\": \"$source\" }"
 
 rm src.tar
 rm src.base64

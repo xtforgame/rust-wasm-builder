@@ -38,21 +38,34 @@ async function wasmGC(wasmFile, callback) {
 }
 
 async function cargo(tar, options = {}) {
+  console.log('options :', options);
   let crateName = 'rustc_h_' + Math.random().toString(36).slice(2);
-  let crateDir = tempDir + '/' + crateName;
+  let srcDir = tempDir + '/' + crateName;
+  let buildDir = !options.buildDir ? srcDir : tempDir + '/' + options.buildDir;
 
-  await mkdir(crateDir);
+  try {
+    await mkdir(srcDir);
+  } catch (error) {
+  }
 
-  let rustTar = crateDir + '/' + 'lib.tar';
-  let wasmFile = crateDir + '/' + 'lib.wasm';
+  let rustTar = srcDir + '/' + 'lib.tar';
+  let wasmFile = srcDir + '/' + 'lib.wasm';
   await writeFile(rustTar, new Buffer(tar, 'base64').toString('ascii'));
 
-  let args = ["tar", "xvf", rustTar, "-C", crateDir];
+  let args = ["tar", "xvf", rustTar, "-C", srcDir];
   await exec(joinCmd(args));
+  if (buildDir !== srcDir) {
+    try {
+      await mkdir(buildDir);
+    } catch (error) {
+    }
+    let args = ["rsync", "-a", "-u", `${srcDir}/`, `${buildDir}/`];
+    await exec(joinCmd(args));
+  }
 
   try {
     let args = [cargoCmd, "build"];
-    args.push('--manifest-path=' + crateDir + '/' + 'Cargo.toml');
+    args.push('--manifest-path=' + buildDir + '/' + 'Cargo.toml');
     args.push('--target=wasm32-unknown-unknown');
 
     if (!options.debug) {
@@ -66,7 +79,7 @@ async function cargo(tar, options = {}) {
 
     let buildPlanOutput = await exec(joinCmd(planArgs), {});
     let buildPlan = JSON.parse(buildPlanOutput);
-    console.log('buildPlanOutput :', buildPlanOutput);
+     // console.log('buildPlanOutput :', buildPlanOutput);
 
     let checkResult = checkBuildPlan(buildPlan);
 
@@ -111,7 +124,7 @@ async function cargo(tar, options = {}) {
         //await unlink(wasmFile);
     }
   } finally {
-    //await unlink(crateDir);
+    //await unlink(srcDir);
   }
 }
 

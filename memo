@@ -1,8 +1,9 @@
 docker build -t rust-wasm-builder -f utils/Dockerfile .
 
-docker run --rm -ti \
+docker run --name rwb --rm -ti \
   -e "DYNO=yes" \
   -e "PORT=8080" \
-  -p 8081:8080 \
+  -p 8083:8080 \
   rust-wasm-builder
 
+docker rm -f rwb

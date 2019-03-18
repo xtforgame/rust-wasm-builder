@@ -1,5 +1,5 @@
 FROM ubuntu:16.04 as curl
-RUN apt-get update && apt-get install -y curl libssl-dev pkg-config
+RUN apt-get update && apt-get install -y curl libssl-dev pkg-config rsync
 
 FROM curl as node
 WORKDIR /node

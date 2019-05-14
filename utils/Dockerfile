@@ -11,9 +11,9 @@ RUN rm -rf node/include
 FROM curl as rust
 WORKDIR /rust
 ENV HOME=/rust
-RUN curl https://sh.rustup.rs | sh -s -- -y --default-toolchain nightly
+RUN curl https://sh.rustup.rs | sh -s -- -y --default-toolchain 1.34.0
 ENV PATH=$PATH:$HOME/.cargo/bin
-RUN rm -rf $HOME/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/share
+RUN rm -rf $HOME/.rustup/toolchains/1.34.0-x86_64-unknown-linux-gnu/share
 RUN rustup target add wasm32-unknown-unknown
 RUN rustup component add rustfmt-preview
 RUN apt-get install -y gcc file make
@@ -27,12 +27,12 @@ RUN CARGO_TARGET_DIR=/rust/wasm-bindgen cargo build --release --target wasm32-un
 # Minimize the size of this rust installation
 # RUN rm -rf $HOME/.cargo/registry
 # RUN strip -g $HOME/.cargo/bin/*
-# RUN rm $HOME/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/bin/rust-gdb
-# RUN rm $HOME/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/bin/rust-lldb
-# # RUN strip -g $HOME/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/bin/*
-# # RUN strip -g $HOME/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/**/*.so
-# # RUN strip -g $HOME/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/bin/*
-# RUN rm $HOME/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/codegen-backends/*emscripten*
+# RUN rm $HOME/.rustup/toolchains/1.34.0-x86_64-unknown-linux-gnu/bin/rust-gdb
+# RUN rm $HOME/.rustup/toolchains/1.34.0-x86_64-unknown-linux-gnu/bin/rust-lldb
+# # RUN strip -g $HOME/.rustup/toolchains/1.34.0-x86_64-unknown-linux-gnu/bin/*
+# # RUN strip -g $HOME/.rustup/toolchains/1.34.0-x86_64-unknown-linux-gnu/**/*.so
+# # RUN strip -g $HOME/.rustup/toolchains/1.34.0-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/bin/*
+# RUN rm $HOME/.rustup/toolchains/1.34.0-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/codegen-backends/*emscripten*
 
 FROM curl
 COPY --from=rust /rust /app

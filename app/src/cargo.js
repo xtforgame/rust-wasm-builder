@@ -73,7 +73,7 @@ async function cargo(tar, options = {}) {
     }
 
     let planArgs = args.slice(0);
-    planArgs.push("-Z unstable-options");
+    // planArgs.push("-Z unstable-options");
     planArgs.push("--build-plan");
     planArgs.push("--quiet");
 

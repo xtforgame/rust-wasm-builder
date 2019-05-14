@@ -73,18 +73,18 @@ async function cargo(tar, options = {}) {
     }
 
     let planArgs = args.slice(0);
-    planArgs.push("-Z unstable-options");
-    planArgs.push("--build-plan");
+    // planArgs.push("-Z unstable-options");
+    // planArgs.push("--build-plan");
     planArgs.push("--quiet");
 
-    let buildPlanOutput = await exec(joinCmd(planArgs), {});
-    let buildPlan = JSON.parse(buildPlanOutput);
-     // console.log('buildPlanOutput :', buildPlanOutput);
+    // let buildPlanOutput = await exec(joinCmd(planArgs), {});
+    // let buildPlan = JSON.parse(buildPlanOutput);
+    //  // console.log('buildPlanOutput :', buildPlanOutput);
 
-    let checkResult = checkBuildPlan(buildPlan);
+    // let checkResult = checkBuildPlan(buildPlan);
 
-    if (!checkResult.success)
-      return checkResult;
+    // if (!checkResult.success)
+    //   return checkResult;
 
     let output;
     let success = false;
@@ -99,7 +99,8 @@ async function cargo(tar, options = {}) {
       if (!success)
         return { success, output: "", message: output };
 
-      let wasmFile = Object.keys(buildPlan["invocations"].slice(-1)[0]["links"])[0];
+      // let wasmFile = Object.keys(buildPlan["invocations"].slice(-1)[0]["links"])[0];
+      let wasmFile = `${buildDir}/target/wasm32-unknown-unknown/release/basic_transform.wasm`;
 
       let wasmBindgenJs = "";
       let wasm = await readFile(wasmFile);
